@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>kobuki_kinematics</name>
+  <version>0.0.0</version>
+  <description>The kobuki_kinematics package</description>
+
+  <maintainer email="canborda@todo.todo">Camilo Andres Borda Gil</maintainer>
+
+  <license>BSD</license>
+
+  <author email="caabordagi@unal.edu.co">Camilo Andres Borda Gil</author>
+
+  <!-- DEPENDENCES -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+
+  <build_export_depend>rospy</build_export_depend>
+
+  <exec_depend>rospy</exec_depend>
+
+
+  <!-- EXPORT -->
+
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+  </export>
+  
+</package>

@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+
+<robot name="basic_kobuki">
+    
+    <!-- Reference Frame (link 0) -->
+    <link name="base_footprint"/>
+
+    <!-- BASE -->
+    
+    <joint name="base_joint" type="fixed">
+        <origin xyz="0.0 0.0 0.015"/>  <!-- ASK: elevation == ground clearance? -->
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+    </joint>
+
+    <link name="base_link">
+
+        <inertial>
+            <origin xyz="0.0 0.0 ${0.083/2}" rpy="0.0 0.0 0.0"/> <!-- AKS: same origin as visual? -->
+            <mass value="2.4"/>
+            <inertia ixx="0.019995" ixy="0.0" ixz="0.0" iyy="0.019995" iyz="0.0" izz="0.03675" />
+            <!-- Kobuki's inertia tensor is approximated by a cylinder with homogeneous mass distribution
+                 More details: http://en.wikipedia.org/wiki/List_of_moment_of_inertia_tensors
+                 m = 2.4 kg; h = 0.09 m; r = 0.175 m
+                 ixx = 1/12 * m * (3 * r^2 + h^2)
+                 iyy = 1/12 * m * (3 * r^2 + h^2)
+                 izz = 1/2 * m * r^2 -->
+        </inertial>
+
+        <visual>
+            <origin xyz="0.0 0.0 ${0.083/2}" rpy="0 0 0"/> <!--ASK: relative to parent joint? origin 0.05199 -->
+            <geometry>
+                <cylinder radius="${0.354/2}" length="0.083"/>
+            </geometry>
+            <material name="base_material">
+                <color rgba="0.25 0.3 0.5 1.0"/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.05949" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${0.354/2}" length="${0.083+0.020}"/>
+            </geometry>
+        </collision>
+        
+    </link>
+
+    <!-- LEFT WHEEL -->
+
+    <joint name="left_wheel_joint" type="continuous">
+        <origin xyz="0.0 ${0.23/2} ${0.076/2-0.015}" rpy="$(eval -pi/2) 0 0"/> <!-- ASK: l as variable?, roll == alpha -->
+        <parent link="base_link"/>
+        <child link="left_wheel_link"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <transmission name="left_wheel_trans">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="left_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="left_wheel_motor">
+            <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <link name="left_wheel_link">
+
+        <inertial>
+            <mass value="0.01"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${0.076/2}" length="0.020"/>
+            </geometry>
+            <material name="left_wheel_material">
+                <color rgba="1.0 0.0 0.0 1.0"/>
+                <texture filename=""/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${0.076/2}" length="0.020"/>
+            </geometry>
+        </collision>
+
+    </link>
+
+    <!-- RIGHT WHEEL -->
+
+    <joint name="right_wheel_joint" type="continuous">
+        <origin xyz="0.0 ${-0.23/2} ${0.076/2-0.015}" rpy="$(eval -pi/2) 0 0"/>
+        <parent link="base_link"/>
+        <child link="right_wheel_link"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <transmission name="right_wheel_trans">
+        <type>transmission_interface/SimpleTransmission</type>
+        <joint name="right_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+        </joint>
+        <actuator name="right_wheel_motor">
+            <hardwareInterface>VelocityJointInterface</hardwareInterface>
+            <mechanicalReduction>1</mechanicalReduction>
+        </actuator>
+    </transmission>
+
+    <link name="right_wheel_link">
+
+        <inertial>
+            <mass value="0.01"/>
+            <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${0.076/2}" length="0.020"/>
+            </geometry>
+            <material name="right_wheel_material">
+                <color rgba="0.0 1.0 0.0 1.0"/>
+                <texture filename=""/>
+            </material>
+        </visual>
+
+        <collision>
+            <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${0.076/2}" length="0.020"/>
+            </geometry>
+        </collision>
+
+    </link>
+
+    <!-- TOP ELEMENTS -->
+
+    <joint name="top_box_joint" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="top_box_link"/>
+        <axis xyz="0.0 0.0 0.0"/>
+    </joint>
+
+    <link name="top_box_link">
+        <visual>
+            <origin xyz="-0.05 0.0 0.083" rpy="0.0 $(eval -pi/6) 0.0"/>
+            <geometry>
+                <box size="0.06 0.28 0.06"/>
+            </geometry>
+            <material name="top_box_material">
+                <color rgba="0.3 0.4 0.5 1.0"/>
+                <texture filename=""/>
+            </material>
+        </visual>
+    </link>
+
+    <joint name="top_cylinder_joint" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <parent link="base_link"/>
+        <child link="top_cylinder_link"/>
+        <axis xyz="0.0 0.0 0.0"/>
+    </joint>
+
+    <link name="top_cylinder_link">
+        <visual>
+            <origin xyz="0.0 0.0 ${0.083+0.006/2}" rpy="0.0 0.0 0.0"/>
+            <geometry>
+                <cylinder radius="${0.354/2-0.01}" length="0.006"/>
+            </geometry>
+            <material name="top_cylinder_material">
+                <color rgba="0.25 0.3 0.5 1.0"/>
+                <texture filename=""/>
+            </material>
+        </visual>
+    </link>
+
+    <!-- GAZEBO PLUG-IN -->
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <robotNamespace>/</robotNamespace>
+        </plugin>
+    </gazebo>
+
+
+</robot>
