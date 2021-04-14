@@ -4,7 +4,8 @@
   <version>0.0.0</version>
   <description>The kobuki_kinematics package</description>
 
-  <maintainer email="canborda@todo.todo">Camilo Andres Borda Gil</maintainer>
+  <maintainer email="canborda@unal.edu.co">Camilo Andres Borda Gil</maintainer>
+  <maintainer email="afriverat@unal.edu.co">Andres Felipe Rivera Torres</maintainer>
 
   <license>BSD</license>
 

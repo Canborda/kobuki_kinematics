@@ -1,12 +1,29 @@
 #!/usr/bin/python3
 
 import rospy
+from pynput.keyboard import Key, Listener
 
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64
 
 import numpy as np
 from rospy.numpy_msg import numpy_msg
+
+current_key = None
+
+# Key pressed and released Callbacks
+
+def pressed(key):
+    global current_key
+    try:
+        current_key = key.char
+    except AttributeError:
+        current_key = key
+
+def released(key):
+    global current_key
+    current_key = None
+
 
 class velocity_publisher:
 
@@ -45,46 +62,83 @@ class velocity_publisher:
         self.pub_left_wheel = rospy.Publisher("/left_wheel_ctrl/command", Float64, queue_size=10)
         self.pub_right_wheel = rospy.Publisher("/right_wheel_ctrl/command", Float64, queue_size=10)
 
+        # LISTENER
+
+        # setup keyboard listener
+        self.listener = Listener(on_press=pressed, on_release=released)
+        self.listener.start()
+        rospy.loginfo('>> STATUS: Init.')
+
         # Polling
+
+        self.command = {'x':0.0, 'y':0.0, 'theta':0.0}
+        self.rate = rospy.Rate(10) # publish messages at 1Hz
         
         while not rospy.is_shutdown():
-            rospy.loginfo('>> Waiting...')
 
-            # Keyboard commands
+            # Exit
 
-            command_char = input()
-            rospy.loginfo('>> Command received: ' + command_char)
-
-            if command_char == 'q':
+            if current_key == Key.esc:
                 rospy.loginfo('>> STATUS: Quit.')
                 rospy.signal_shutdown('Request shutdown')
             
-            elif command_char == 's':
-                rospy.loginfo('>> STATUS: Stopped.')
-                msf_Float = Float64()
-                msf_Float = 0.0
-                # Publish
-                self.pub_left_wheel.publish(msf_Float)
-                self.pub_right_wheel.publish(msf_Float)
+            # Move X
             
-            elif command_char == 'w':
-                rospy.loginfo('>> STATUS: Move forward.')
-                msf_Float = Float64()
-                msf_Float = 1.0
-                # Publish
-                self.pub_left_wheel.publish(msf_Float)
-                self.pub_right_wheel.publish(msf_Float)
+            elif current_key == 'w':
+                self.command['x'] = self.command['x']+0.02 if self.command['x'] < 1.0 else 1.0
 
-            elif command_char == 'r':
-                rospy.loginfo('>> STATUS: Rotate.')
-                msf_Float = Float64()
-                msf_Float = 1.0
-                # Publish
-                self.pub_left_wheel.publish(msf_Float)
-                self.pub_right_wheel.publish(-msf_Float)
+            elif current_key == 's':
+                self.command['x'] = self.command['x']-0.02 if self.command['x'] > -1.0 else -1.0
+            
+            # Rotate
+
+            elif current_key == 'a':
+                self.command['theta'] = self.command['theta']+10 if self.command['theta'] < 180 else 180
+            
+            elif current_key == 'd':
+                self.command['theta'] = self.command['theta']-10 if self.command['theta'] > -180 else -180
+            
+            # Stop
+
+            elif current_key == 'x':
+                self.command['x'] = 0.0
+                self.command['theta'] = 0.0
+
+            # Inverse kinematics
+
+            result = np.matmul(self.Jacobian, [self.command['x'], self.command['y'], self.command['theta']*np.pi/180])
+            
+            # Send velocity
+
+            msgFloat = Float64()
+            msgFloat.data = result[0]
+            self.pub_left_wheel.publish(msgFloat)
+
+            msgFloat = Float64()
+            msgFloat.data = result[1]
+            self.pub_right_wheel.publish(msgFloat)
+
+            self.rate.sleep()
+
+            # Printing
+
+            print(chr(27)+"[2J")
+            print('-'*70)
+            print('For Vx++ use w \t\t For ω++ use a \t\t For STOP use x')
+            print('For Vx-- use s \t\t For ω-- use d \t\t Press ESC to quit')
+            print('-'*70)
+            print('')
+            print('\tVx = {:.2} m/s\t\t Left wheel = {:.4} rpm'.format(self.command['x'], result[0]*30/np.pi))
+            print('\tVy = {:.2} m/s\t\tRight wheel = {:.4} rpm'.format(self.command['y'], result[1]*30/np.pi))
+            print('\t ω = {} deg/s'.format(self.command['theta']))
+            print('')
+            print('-'*70)
+            print('')
+            print('Key pressed = ', current_key)
 
 
     def cmd_vel_cb(self, cmd_vel):
+
         command = np.array([0,0,0], dtype=np.float)
         command[0] = cmd_vel.linear.x
         command[1] = cmd_vel.linear.y
@@ -105,3 +159,4 @@ class velocity_publisher:
         msgFloat = Float64()
         msgFloat.data = result[1]
         self.pub_right_wheel.publish(msgFloat)
+    
