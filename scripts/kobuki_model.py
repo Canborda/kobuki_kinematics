@@ -71,8 +71,8 @@ class velocity_publisher:
 
         # Polling
 
-        self.command = {'x':0.0, 'y':0.0, 'theta':0.0}
-        self.rate = rospy.Rate(10) # publish messages at 1Hz
+        self.msg = Twist()
+        self.rate = rospy.Rate(10) # publish messages at 10Hz
         
         while not rospy.is_shutdown():
 
@@ -85,28 +85,28 @@ class velocity_publisher:
             # Move X
             
             elif current_key == 'w':
-                self.command['x'] = self.command['x']+0.02 if self.command['x'] < 1.0 else 1.0
+                self.msg.linear.x = self.msg.linear.x+0.02 if self.msg.linear.x < 1.0 else 1.0
 
             elif current_key == 's':
-                self.command['x'] = self.command['x']-0.02 if self.command['x'] > -1.0 else -1.0
+                self.msg.linear.x = self.msg.linear.x-0.02 if self.msg.linear.x > -1.0 else -1.0
             
             # Rotate
 
             elif current_key == 'a':
-                self.command['theta'] = self.command['theta']+10 if self.command['theta'] < 180 else 180
+                self.msg.angular.z = self.msg.angular.z+10 if self.msg.angular.z < 180 else 180
             
             elif current_key == 'd':
-                self.command['theta'] = self.command['theta']-10 if self.command['theta'] > -180 else -180
+                self.msg.angular.z = self.msg.angular.z-10 if self.msg.angular.z > -180 else -180
             
             # Stop
 
             elif current_key == 'x':
-                self.command['x'] = 0.0
-                self.command['theta'] = 0.0
+                self.msg.linear.x = 0.0
+                self.msg.angular.z = 0.0
 
             # Inverse kinematics
 
-            result = np.matmul(self.Jacobian, [self.command['x'], self.command['y'], self.command['theta']*np.pi/180])
+            result = np.matmul(self.Jacobian, [self.msg.linear.x, self.msg.linear.y, self.msg.angular.z*np.pi/180])
             
             # Send velocity
 
@@ -128,9 +128,9 @@ class velocity_publisher:
             print('For Vx-- use s \t\t For ω-- use d \t\t Press ESC to quit')
             print('-'*70)
             print('')
-            print('\tVx = {:.2} m/s\t\t Left wheel = {:.4} rpm'.format(self.command['x'], result[0]*30/np.pi))
-            print('\tVy = {:.2} m/s\t\tRight wheel = {:.4} rpm'.format(self.command['y'], result[1]*30/np.pi))
-            print('\t ω = {} deg/s'.format(self.command['theta']))
+            print('\tVx = {:.2} m/s\t\t Left wheel = {:.4} rpm'.format(self.msg.linear.x, result[0]*30/np.pi))
+            print('\tVy = {:.2} m/s\t\tRight wheel = {:.4} rpm'.format(self.msg.linear.y, result[1]*30/np.pi))
+            print('\t ω = {} deg/s'.format(self.msg.angular.z))
             print('')
             print('-'*70)
             print('')
@@ -159,4 +159,3 @@ class velocity_publisher:
         msgFloat = Float64()
         msgFloat.data = result[1]
         self.pub_right_wheel.publish(msgFloat)
-    
