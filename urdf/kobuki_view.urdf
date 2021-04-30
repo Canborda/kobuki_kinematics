@@ -29,13 +29,12 @@
 
         <visual>
             <origin xyz="0.0 0.0 ${0.083/2}" rpy="0 0 0"/> <!--ASK: relative to parent joint? origin 0.05199 -->
-            <!-- <geometry>
+            <geometry>
                 <cylinder radius="${0.354/2}" length="0.083"/>
             </geometry>
             <material name="base_material">
                 <color rgba="0.25 0.3 0.5 1.0"/>
-            </material> -->
-            
+            </material>
         </visual>
 
         <collision>
