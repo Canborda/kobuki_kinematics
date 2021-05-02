@@ -30,7 +30,7 @@
         <visual>
             <origin xyz="0.0 0.0 ${0.083/2}" rpy="0 0 0"/> <!--ASK: relative to parent joint? origin 0.05199 -->
             <geometry>
-                <cylinder radius="${0.354/2}" length="0.083"/>
+                <mesh filename="package://kobuki_kinematics/meshes/main_body.dae"/>
             </geometry>
             <material name="base_material">
                 <color rgba="0.25 0.3 0.5 1.0"/>
@@ -138,48 +138,6 @@
             </geometry>
         </collision>
 
-    </link>
-
-    <!-- TOP ELEMENTS -->
-
-    <joint name="top_box_joint" type="fixed">
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <parent link="base_link"/>
-        <child link="top_box_link"/>
-        <axis xyz="0.0 0.0 0.0"/>
-    </joint>
-
-    <link name="top_box_link">
-        <visual>
-            <origin xyz="-0.05 0.0 0.083" rpy="0.0 $(eval -pi/6) 0.0"/>
-            <geometry>
-                <box size="0.06 0.28 0.06"/>
-            </geometry>
-            <material name="top_box_material">
-                <color rgba="0.3 0.4 0.5 1.0"/>
-                <texture filename=""/>
-            </material>
-        </visual>
-    </link>
-
-    <joint name="top_cylinder_joint" type="fixed">
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <parent link="base_link"/>
-        <child link="top_cylinder_link"/>
-        <axis xyz="0.0 0.0 0.0"/>
-    </joint>
-
-    <link name="top_cylinder_link">
-        <visual>
-            <origin xyz="0.0 0.0 ${0.083+0.006/2}" rpy="0.0 0.0 0.0"/>
-            <geometry>
-                <cylinder radius="${0.354/2-0.01}" length="0.006"/>
-            </geometry>
-            <material name="top_cylinder_material">
-                <color rgba="0.25 0.3 0.5 1.0"/>
-                <texture filename=""/>
-            </material>
-        </visual>
     </link>
 
     <!-- GAZEBO PLUG-IN -->
